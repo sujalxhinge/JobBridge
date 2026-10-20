@@ -16,6 +16,8 @@ public class Job {
     private Double salaryMin;
     private Double salaryMax;
     private String jobType;
+    @Enumerated(EnumType.STRING)
+    private JobStatus status = JobStatus.OPEN;
     private LocalDateTime createdAt;
     @PrePersist
     protected void onCreate(){
@@ -94,6 +96,13 @@ public class Job {
 
     public void setJobType(String jobType) {
         this.jobType = jobType;
+    }
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(JobStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
