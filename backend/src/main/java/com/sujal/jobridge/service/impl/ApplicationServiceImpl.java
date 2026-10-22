@@ -8,6 +8,7 @@ import com.sujal.jobridge.repository.JobRepository;
 import com.sujal.jobridge.repository.UserRepository;
 import com.sujal.jobridge.service.ApplicationService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -21,6 +22,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         this.userRepository = userRepository;
     }
     @Override
+    @Transactional
     public com.sujal.jobridge.entity.Application applyForJob(Long candidateId, Long jobId){
         User candidate = userRepository.findById(candidateId)
                 .orElseThrow(() ->
