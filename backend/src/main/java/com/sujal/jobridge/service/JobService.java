@@ -9,4 +9,8 @@ public interface JobService {
     Job getJobById(Long jobId);
 
     Job createJob(Job job, Long recruiterId);
+
+    List<Job> searchJobsByTitle(String title);
+
+    List<Job> filterJobsByLocation(String location);
 }

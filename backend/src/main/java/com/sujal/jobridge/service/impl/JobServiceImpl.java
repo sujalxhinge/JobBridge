@@ -46,5 +46,13 @@ public class JobServiceImpl implements JobService {
         job.setRecruiter(recruiter);
         return jobRepository.save(job);
     }
+    @Override
+    public List<Job> searchJobsByTitle(String title){
+        return jobRepository.findByTitleContainingIgnoreCase(title);
+    }
+    @Override
+    public List<Job> filterJobsByLocation(String location){
+        return jobRepository.findByLocationIgnoreCase(location);
+    }
 
 }
