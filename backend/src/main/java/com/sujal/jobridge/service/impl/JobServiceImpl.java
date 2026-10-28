@@ -1,6 +1,7 @@
 package com.sujal.jobridge.service.impl;
 
 import com.sujal.jobridge.entity.Job;
+import com.sujal.jobridge.entity.JobStatus;
 import com.sujal.jobridge.exception.ResourceNotFoundException;
 import com.sujal.jobridge.repository.JobRepository;
 import com.sujal.jobridge.service.JobService;
@@ -9,6 +10,8 @@ import com.sujal.jobridge.entity.Role;
 import com.sujal.jobridge.entity.User;
 import com.sujal.jobridge.repository.UserRepository;
 import com.sujal.jobridge.exception.BusinessRuleException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -48,11 +51,15 @@ public class JobServiceImpl implements JobService {
     }
     @Override
     public List<Job> searchJobsByTitle(String title){
-        return jobRepository.findByTitleContainingIgnoreCase(title);
+        return jobRepository.findByTitleContainingIgnoreCaseAndStatus(title, JobStatus.OPEN);
     }
     @Override
     public List<Job> filterJobsByLocation(String location){
-        return jobRepository.findByLocationIgnoreCase(location);
+        return jobRepository.findByLocationIgnoreCaseAndStatus(location,JobStatus.OPEN);
+    }
+    @Override
+    public Page<Job> getOpenJobs(Pageable pageable) {
+        return jobRepository.findByStatus(JobStatus.OPEN, pageable);
     }
 
 }
