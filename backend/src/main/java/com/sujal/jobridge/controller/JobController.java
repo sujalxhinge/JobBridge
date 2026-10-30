@@ -8,6 +8,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -35,5 +40,11 @@ public class JobController {
     @GetMapping("/location")
     public List<Job> filterJobsByLocation(@RequestParam String location){
         return jobService.filterJobsByLocation(location);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Job createJob(@RequestBody Job job, @RequestParam Long recruiterId){
+        return jobService.createJob(job,recruiterId);
     }
 }
