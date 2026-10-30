@@ -37,6 +37,7 @@ public class JobController {
     public List<Job> searchJobsByTitle(@RequestParam String title){
         return jobService.searchJobsByTitle(title);
     }
+
     @GetMapping("/location")
     public List<Job> filterJobsByLocation(@RequestParam String location){
         return jobService.filterJobsByLocation(location);
@@ -46,5 +47,18 @@ public class JobController {
     @ResponseStatus(HttpStatus.CREATED)
     public Job createJob(@RequestBody Job job, @RequestParam Long recruiterId){
         return jobService.createJob(job,recruiterId);
+    }
+
+    @GetMapping("/{jobId}")
+    public Job getJobById(@PathVariable Long jobId){
+        return jobService.getJobById(jobId);
+    }
+
+    @PutMapping("/{jobId}")
+    public Job updateJob(
+            @PathVariable Long jobId,
+            @RequestBody Job updatedJob) {
+
+        return jobService.updateJob(jobId, updatedJob);
     }
 }

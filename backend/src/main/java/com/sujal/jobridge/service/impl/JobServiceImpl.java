@@ -29,6 +29,7 @@ public class JobServiceImpl implements JobService {
     public List<Job> getAllJobs(){
         return jobRepository.findAll();
     }
+
     @Override
     public Job getJobById(Long jobId){
         return jobRepository.findById(jobId)
@@ -61,5 +62,22 @@ public class JobServiceImpl implements JobService {
     public Page<Job> getOpenJobs(Pageable pageable) {
         return jobRepository.findByStatus(JobStatus.OPEN, pageable);
     }
+    @Override
+    public Job updateJob(Long jobId, Job updatedJob) {
 
+        Job existingJob = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job not found with id: " + jobId));
+
+        existingJob.setTitle(updatedJob.getTitle());
+        existingJob.setDescription(updatedJob.getDescription());
+        existingJob.setLocation(updatedJob.getLocation());
+        existingJob.setSalaryMin(updatedJob.getSalaryMin());
+        existingJob.setSalaryMax(updatedJob.getSalaryMax());
+        existingJob.setJobType(updatedJob.getJobType());
+        existingJob.setStatus(updatedJob.getStatus());
+
+        return jobRepository.save(existingJob);
+    }
 }

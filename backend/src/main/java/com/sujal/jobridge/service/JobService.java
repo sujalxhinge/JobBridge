@@ -20,4 +20,6 @@ public interface JobService {
     List<Job> filterJobsByLocation(String location);
 
     Page<Job> getOpenJobs(Pageable pageable);
+
+    Job updateJob(Long jobId, Job updateJob);
 }
