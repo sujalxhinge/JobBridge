@@ -22,4 +22,6 @@ public interface JobService {
     Page<Job> getOpenJobs(Pageable pageable);
 
     Job updateJob(Long jobId, Job updateJob);
+
+    void deleteJob(Long jobId);
 }

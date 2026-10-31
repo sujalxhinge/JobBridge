@@ -61,4 +61,10 @@ public class JobController {
 
         return jobService.updateJob(jobId, updatedJob);
     }
+
+    @DeleteMapping("/{jobId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteJob(@PathVariable Long jobId) {
+        jobService.deleteJob(jobId);
+    }
 }

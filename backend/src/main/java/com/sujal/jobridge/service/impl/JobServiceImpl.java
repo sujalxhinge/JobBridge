@@ -1,4 +1,5 @@
 package com.sujal.jobridge.service.impl;
+import com.sujal.jobridge.repository.ApplicationRepository;
 
 import com.sujal.jobridge.entity.Job;
 import com.sujal.jobridge.entity.JobStatus;
@@ -19,10 +20,16 @@ import java.util.List;
 public class JobServiceImpl implements JobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final ApplicationRepository applicationRepository;
 
-    public JobServiceImpl(JobRepository jobRepository, UserRepository userRepository) {
+    public JobServiceImpl(
+            JobRepository jobRepository,
+            UserRepository userRepository,
+            ApplicationRepository applicationRepository) {
+
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.applicationRepository = applicationRepository;
     }
 
     @Override
@@ -79,5 +86,22 @@ public class JobServiceImpl implements JobService {
         existingJob.setStatus(updatedJob.getStatus());
 
         return jobRepository.save(existingJob);
+    }
+
+    @Override
+    public void deleteJob(Long jobId) {
+
+        Job existingJob = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job not found with id: " + jobId));
+
+        // Check whether applications exist
+        if (applicationRepository.existsByJobId(jobId)) {
+            throw new BusinessRuleException(
+                    "Cannot delete job because applications already exist");
+        }
+
+        jobRepository.delete(existingJob);
     }
 }
