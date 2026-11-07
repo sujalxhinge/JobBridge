@@ -7,53 +7,74 @@ import com.sujal.jobridge.repository.ApplicationRepository;
 import com.sujal.jobridge.repository.JobRepository;
 import com.sujal.jobridge.repository.UserRepository;
 import com.sujal.jobridge.service.ApplicationService;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
+
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
 
-    public ApplicationServiceImpl(ApplicationRepository applicationRepository, JobRepository jobRepository, UserRepository userRepository) {
+    public ApplicationServiceImpl(
+            ApplicationRepository applicationRepository,
+            JobRepository jobRepository,
+            UserRepository userRepository) {
+
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
     }
+
     @Override
     @Transactional
-    public com.sujal.jobridge.entity.Application applyForJob(Long candidateId, Long jobId){
-        User candidate = userRepository.findById(candidateId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Candidate not found with id: " + candidateId));
+    public Application applyForJob(Long jobId) {
 
+        // Get authenticated user's email
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        // Find candidate using email
+        User candidate = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with email: " + email));
+
+        // Check candidate role
+        if (candidate.getRole() != Role.CANDIDATE) {
+            throw new BusinessRuleException(
+                    "Only candidates can apply for jobs");
+        }
+
+        // Find job
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Job not found with id: " + jobId));
+                        new ResourceNotFoundException(
+                                "Job not found with id: " + jobId));
 
-        if(candidate.getRole() != Role.CANDIDATE){
-            throw new BusinessRuleException("only candidate can apply for this job");
-        }
+        // Check job status
         if (job.getStatus() != JobStatus.OPEN) {
             throw new BusinessRuleException(
-                    "Cannot apply for a closed job"
-            );
+                    "Cannot apply for a closed job");
         }
 
+        // Check duplicate application
         boolean alreadyApplied =
                 applicationRepository.existsByCandidateIdAndJobId(
-                        candidateId,jobId
-                );
+                        candidate.getId(), jobId);
 
-        if (alreadyApplied){
+        if (alreadyApplied) {
             throw new BusinessRuleException(
-                    "you have already applied for this job"
-            );
+                    "You have already applied for this job");
         }
+
+        // Create application
         Application application = new Application(candidate, job);
 
         return applicationRepository.save(application);
     }
 }
-
