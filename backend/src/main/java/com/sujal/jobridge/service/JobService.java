@@ -13,7 +13,7 @@ public interface JobService {
 
     Job getJobById(Long jobId);
 
-    Job createJob(Job job, Long recruiterId);
+    Job createJob(Job job);
 
     List<Job> searchJobsByTitle(String title);
 

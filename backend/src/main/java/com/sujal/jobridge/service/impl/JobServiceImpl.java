@@ -15,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.Objects;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -46,15 +49,25 @@ public class JobServiceImpl implements JobService {
 
     //Create Job Method
     @Override
-    public Job createJob(Job job,Long recruiterId){
-        User recruiter = userRepository.findById(recruiterId)
-                .orElseThrow(()->
-                        new ResourceNotFoundException("Recruiter not found with id: " + recruiterId));
+    public Job createJob(Job job) {
 
-        if(recruiter.getRole()!=Role.RECRUITER){
-            throw new BusinessRuleException("Only recruiters can create jobs");
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User recruiter = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Recruiter not found"));
+
+        if (recruiter.getRole() != Role.RECRUITER) {
+            throw new BusinessRuleException(
+                    "Only recruiters can create jobs");
         }
+
+        job.setId(null);
         job.setRecruiter(recruiter);
+
         return jobRepository.save(job);
     }
     @Override
@@ -77,6 +90,8 @@ public class JobServiceImpl implements JobService {
                         new ResourceNotFoundException(
                                 "Job not found with id: " + jobId));
 
+        validateRecruiterOwnership(existingJob);
+
         existingJob.setTitle(updatedJob.getTitle());
         existingJob.setDescription(updatedJob.getDescription());
         existingJob.setLocation(updatedJob.getLocation());
@@ -96,12 +111,43 @@ public class JobServiceImpl implements JobService {
                         new ResourceNotFoundException(
                                 "Job not found with id: " + jobId));
 
-        // Check whether applications exist
+        validateRecruiterOwnership(existingJob);
+
         if (applicationRepository.existsByJobId(jobId)) {
             throw new BusinessRuleException(
                     "Cannot delete job because applications already exist");
         }
 
         jobRepository.delete(existingJob);
+    }
+    private void validateRecruiterOwnership(Job job) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+
+            throw new BusinessRuleException("User is not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        User recruiter = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Recruiter not found"));
+
+        if (recruiter.getRole() != Role.RECRUITER) {
+            throw new BusinessRuleException(
+                    "Only recruiters can perform this operation");
+        }
+
+        if (!Objects.equals(
+                job.getRecruiter().getId(),
+                recruiter.getId())) {
+
+            throw new BusinessRuleException(
+                    "You are not authorized to modify this job");
+        }
     }
 }

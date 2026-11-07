@@ -64,10 +64,9 @@ public class JobController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public JobResponseDTO createJob(
-            @RequestBody Job job,
-            @RequestParam Long recruiterId) {
+            @RequestBody Job job) {
 
-        Job savedJob = jobService.createJob(job, recruiterId);
+        Job savedJob = jobService.createJob(job);
 
         return jobMapper.toDTO(savedJob);
     }
