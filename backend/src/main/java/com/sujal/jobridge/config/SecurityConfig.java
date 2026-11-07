@@ -1,9 +1,12 @@
+
 package com.sujal.jobridge.config;
 
 import com.sujal.jobridge.service.CustomUserDetailsService;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,15 +25,40 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+
                 .authenticationProvider(authenticationProvider)
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public access: view jobs
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/jobs",
                                 "/api/jobs/**"
                         ).permitAll()
+
+                        // Only recruiters can create jobs
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/jobs"
+                        ).hasRole("RECRUITER")
+
+                        // Only recruiters can update jobs
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/jobs/**"
+                        ).hasRole("RECRUITER")
+
+                        // Only recruiters can delete jobs
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/jobs/**"
+                        ).hasRole("RECRUITER")
+
+                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
+
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();
