@@ -54,6 +54,8 @@ public class SecurityConfig {
                                 HttpMethod.DELETE,
                                 "/api/jobs/**"
                         ).hasRole("RECRUITER")
+                        .requestMatchers(HttpMethod.POST, "/api/applications/**")
+                        .hasRole("CANDIDATE")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
