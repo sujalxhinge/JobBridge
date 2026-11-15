@@ -4,6 +4,8 @@ import com.sujal.jobridge.dto.ApplicationResponseDTO;
 import com.sujal.jobridge.entity.Application;
 import com.sujal.jobridge.mapper.ApplicationMapper;
 import com.sujal.jobridge.service.ApplicationService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,5 +34,16 @@ public class ApplicationController {
                 applicationService.applyForJob(jobId);
 
         return applicationMapper.toDTO(application);
+    }
+
+    @GetMapping("/my-applications")
+    public List<ApplicationResponseDTO> getMyApplications() {
+
+        List<Application> applications =
+                applicationService.getMyApplications();
+
+        return applications.stream()
+                .map(applicationMapper::toDTO)
+                .toList();
     }
 }

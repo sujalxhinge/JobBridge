@@ -11,6 +11,7 @@ import com.sujal.jobridge.service.ApplicationService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -76,5 +77,29 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application application = new Application(candidate, job);
 
         return applicationRepository.save(application);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Application> getMyApplications() {
+
+        // Get authenticated user's email
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        // Find logged-in candidate
+        User candidate = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with email: " + email));
+
+        // Verify candidate role
+        if (candidate.getRole() != Role.CANDIDATE) {
+            throw new BusinessRuleException(
+                    "Only candidates can view their applications");
+        }
+
+        // Fetch applications belonging to this candidate
+        return applicationRepository.findByCandidateId(candidate.getId());
     }
 }
