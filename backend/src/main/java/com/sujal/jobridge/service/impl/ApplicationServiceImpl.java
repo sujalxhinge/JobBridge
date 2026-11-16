@@ -102,4 +102,40 @@ public class ApplicationServiceImpl implements ApplicationService {
         // Fetch applications belonging to this candidate
         return applicationRepository.findByCandidateId(candidate.getId());
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Application> getApplicantsForJob(Long jobId) {
+
+        // Get authenticated user's email
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        // Find recruiter
+        User recruiter = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with email: " + email));
+
+        // Verify recruiter role
+        if (recruiter.getRole() != Role.RECRUITER) {
+            throw new BusinessRuleException(
+                    "Only recruiters can view applicants");
+        }
+
+        // Find job
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job not found with id: " + jobId));
+
+        // Verify job ownership
+        if (!job.getRecruiter().getId().equals(recruiter.getId())) {
+            throw new BusinessRuleException(
+                    "You are not authorized to view applicants for this job");
+        }
+
+        // Fetch applicants
+        return applicationRepository.findByJobId(jobId);
+    }
 }

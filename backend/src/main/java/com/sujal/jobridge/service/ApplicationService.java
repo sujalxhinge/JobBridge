@@ -7,4 +7,5 @@ public interface ApplicationService {
 
     Application applyForJob(Long jobId);
     List<Application> getMyApplications();
+    List<Application> getApplicantsForJob(Long jobId);
 }

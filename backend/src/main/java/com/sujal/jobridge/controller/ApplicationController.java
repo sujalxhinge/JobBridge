@@ -46,4 +46,16 @@ public class ApplicationController {
                 .map(applicationMapper::toDTO)
                 .toList();
     }
+
+    @GetMapping("/job/{jobId}")
+    public List<ApplicationResponseDTO> getApplicantsForJob(
+            @PathVariable Long jobId) {
+
+        List<Application> applications =
+                applicationService.getApplicantsForJob(jobId);
+
+        return applications.stream()
+                .map(applicationMapper::toDTO)
+                .toList();
+    }
 }
