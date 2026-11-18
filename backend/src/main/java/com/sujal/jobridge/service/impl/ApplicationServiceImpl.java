@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import com.sujal.jobridge.entity.ApplicationStatus;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -137,5 +138,42 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         // Fetch applicants
         return applicationRepository.findByJobId(jobId);
+    }
+    @Override
+    @Transactional
+    public Application updateApplicationStatus(Long applicationId, ApplicationStatus status) {
+
+        // 1. Get logged-in recruiter's email
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        // 2. Find recruiter
+        User recruiter = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+
+        // 3. Verify recruiter role
+        if (recruiter.getRole() != Role.RECRUITER) {
+            throw new RuntimeException("Only recruiters can update application status");
+        }
+
+        // 4. Find application
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        // 5. Verify job ownership
+        if (!application.getJob().getRecruiter().getId().equals(recruiter.getId())) {
+            throw new RuntimeException("You are not authorized to update this application");
+        }
+
+        // 6. Validate status
+        if (status == null) {
+            throw new IllegalArgumentException("Application status cannot be null");
+        }
+
+        // 7. Update and save
+        application.setStatus(status);
+
+        return applicationRepository.save(application);
     }
 }

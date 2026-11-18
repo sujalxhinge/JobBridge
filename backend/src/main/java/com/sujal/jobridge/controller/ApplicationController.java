@@ -6,6 +6,7 @@ import com.sujal.jobridge.mapper.ApplicationMapper;
 import com.sujal.jobridge.service.ApplicationService;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.sujal.jobridge.dto.UpdateApplicationStatusRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -57,5 +58,18 @@ public class ApplicationController {
         return applications.stream()
                 .map(applicationMapper::toDTO)
                 .toList();
+    }
+
+    @PutMapping("/{applicationId}/status")
+    public ApplicationResponseDTO updateApplicationStatus(
+            @PathVariable Long applicationId,
+            @RequestBody UpdateApplicationStatusRequest request) {
+
+        Application updated = applicationService.updateApplicationStatus(
+                applicationId,
+                request.getStatus()
+        );
+
+        return applicationMapper.toDTO(updated);
     }
 }
