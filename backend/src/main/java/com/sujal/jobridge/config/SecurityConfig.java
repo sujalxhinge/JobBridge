@@ -73,6 +73,9 @@ public class SecurityConfig {
                                 "/api/applications/*/status"
                         ).hasRole("RECRUITER")
 
+                        // Allow anyone to register
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
