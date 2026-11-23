@@ -4,6 +4,7 @@ package com.sujal.jobridge.controller;
 import com.sujal.jobridge.dto.RegisterRequestDTO;
 import com.sujal.jobridge.dto.RegisterResponseDTO;
 import com.sujal.jobridge.service.AuthService;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public RegisterResponseDTO register(
-            @RequestBody RegisterRequestDTO request) {
+            @Valid @RequestBody RegisterRequestDTO request) {
 
         return authService.register(request);
     }
